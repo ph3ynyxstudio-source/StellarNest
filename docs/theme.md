@@ -120,27 +120,27 @@ Un texte visible réutilisé ne doit pas être dispersé dans App.tsx.
 
 Contient les variables CSS globales et les styles globaux.
 
-### Direction visuelle MVP — "Nébuleuse Claire"
+### Direction visuelle MVP — "Nid Stellaire"
 
-Fond blanc perle, doux et chaleureux — pas de noir pur, pas de blanc pur. Accents violet et cyan hérités de l'identité cosmique de départ (logo enclume/cristal), mais assombris pour rester lisibles sur fond clair.
+Fond bleu nuit profond — pas de noir pur. Accents violet et cyan hérités de l'identité cosmique de départ (logo enclume/cristal), saturés et lumineux pour ressortir sur fond sombre. Remplace l'ancienne direction claire "Nébuleuse Claire".
 
 ```css
 :root {
   /* Fonds */
-  --bg-app: #f4f3f0;
-  --bg-card: #ffffff;
-  --bg-card-subtle: #faf9f6;
+  --bg-app: #0b0e1a;
+  --bg-card: #141830;
+  --bg-card-subtle: #1b2040;
 
   /* Texte */
-  --text-primary: #2a2840;
-  --text-secondary: #8a869c;
+  --text-primary: #f2f1f8;
+  --text-secondary: #8d8ab0;
 
   /* Accents */
-  --accent-violet: #5b4fd6;
-  --accent-cyan: #38c9dc;
+  --accent-violet: #7c5cff;
+  --accent-cyan: #4de3f0;
 
   /* Bordures */
-  --border-subtle: #e0ddf2;
+  --border-subtle: #2a2f52;
 }
 ```
 
@@ -182,7 +182,7 @@ Les textes propres à un écran ou à un composant peuvent rester locaux tant qu
 
 ### Règle 9
 
-Le cyan doit toujours être la version assombrie (`--accent-cyan: #38c9dc`) sur fond clair — la version pâle testée dans les premières directions visuelles devient illisible sur `--bg-app`.
+Le cyan doit toujours rester lisible sur `--bg-app` — version assombrie sur fond clair, version lumineuse (`--accent-cyan: #4de3f0`) sur fond sombre. Toujours vérifier le contraste après un changement de direction visuelle.
 
 ---
 
@@ -219,7 +219,7 @@ variables CSS et design_tokens.ts contradictoires
 
 ## V2+ — Sélecteur de thème
 
-Idée notée mais non implémentée au MVP : permettre à l'utilisateur de choisir entre plusieurs directions visuelles (dont une version sombre "Nid Stellaire") dans les paramètres.
+Idée notée mais non implémentée au MVP : permettre à l'utilisateur de choisir entre plusieurs directions visuelles (dont l'ancienne version claire "Nébuleuse Claire") dans les paramètres. Au MVP, une seule direction visuelle est active à la fois — actuellement "Nid Stellaire".
 
 ```txt
 À classer et scoper formellement avant implémentation (voir governance.md).

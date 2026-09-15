@@ -40,6 +40,7 @@ ne modifie pas le code source sans action explicite de l'utilisateur
 Le MVP actuel est centré sur :
 
 ```txt
+Launcher (écran de démarrage, choix explicite avant d'entrer dans l'éditeur)
 Canvas d'assemblage visuel
 Librairie de components de base
 Lien component ↔ code source
@@ -47,6 +48,14 @@ Export du projet en code réel
 ```
 
 Toute évolution doit respecter ce périmètre.
+
+---
+
+## Fonctionnalités classées
+
+### Launcher — MVP
+
+Écran de démarrage affiché avant l'Editor. Classé MVP car nécessaire avant de pouvoir choisir le mode Mobile/Desktop et plus généralement avant d'entrer dans l'éditeur — l'utilisateur doit toujours faire un choix explicite (nouveau projet ou projet récent), jamais de reprise automatique. Voir `layout.md` (section Launcher) et `storage.md` (`launcher.json`).
 
 ---
 
@@ -186,45 +195,19 @@ mettre à jour le document existant.
 
 # Organisation documentaire
 
-## INDEX.md
-
-Point d'entrée principal.
-
----
-
-## docs/system/
-
-Décrit :
+Tous les documents vivent à plat dans `docs/` :
 
 ```txt
-architecture
-component engine
-storage
+docs/
+  architecture.md   → système, component engine, flux
+  governance.md      → gouvernance, règles, limites
+  components.md       → structure de la librairie de components
+  storage.md          → où vivent les données
+  layout.md           → structure visuelle de l'écran
+  theme.md            → couleurs, tokens, textes UI
 ```
 
----
-
-## docs/ui/
-
-Décrit :
-
-```txt
-layout
-composants
-thème
-```
-
----
-
-## docs/rules/
-
-Décrit :
-
-```txt
-gouvernance
-règles
-limites
-```
+Pas de sous-dossiers (`system/`, `ui/`, `rules/`) ni de `INDEX.md` séparé — ce fichier (`governance.md`) et `CLAUDE.md` font office de point d'entrée.
 
 ---
 

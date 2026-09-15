@@ -113,13 +113,25 @@ contrôler l'interface
 
 ### Component Engine
 
-Localisation prévue :
+Localisation :
 
 ```txt
 src-tauri/engine/
 ```
 
-Responsabilités :
+État actuel (première tranche) : le moteur génère un nouveau fichier `.tsx` propre à partir de l'état du canvas — il ne parse ni ne réécrit encore de fichier existant en AST (approche façon Onlook, prévue pour une itération suivante).
+
+```txt
+docs/architecture.md
+  ↳ src-tauri/engine/mod.rs
+    generate_page(&CanvasState) -> String
+    → construit le JSX pour chaque élément (au MVP : componentRef "Card")
+    → produit un fichier .tsx complet (imports + composant exporté)
+```
+
+Déclenché par la commande Rust `export_project` (`src-tauri/src/lib.rs`) : lit l'état du canvas (même source que `get_canvas_state`), appelle `engine::generate_page`, écrit le résultat dans `src/screens/Export/GeneratedPage.tsx` (crée le dossier si besoin). Rust orchestre l'appel ; toute la logique de génération vit dans `engine/`, jamais directement dans `lib.rs`.
+
+Responsabilités (cible complète, au-delà de cette première tranche) :
 
 ```txt
 maintenir la librairie de components de référence
@@ -290,8 +302,9 @@ Toutes les communications passent par l'orchestration Rust.
 
 ```txt
 src/
+src/screens/Export/GeneratedPage.tsx  (généré par le Component Engine, voir ci-dessus)
 src-tauri/
-src-tauri/engine/  (à venir)
+src-tauri/engine/
 docs/
 ```
 

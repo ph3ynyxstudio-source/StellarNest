@@ -137,7 +137,8 @@ src-tauri/engine/  (Component Engine, à venir)
 ```txt
 .stellarnest/
 ├─ canvas.json    → état visuel du canvas
-└─ library.json   → métadonnées d'affichage de la librairie
+├─ library.json   → métadonnées d'affichage de la librairie
+└─ launcher.json  → référence au dernier projet ouvert (écran Launcher)
 ```
 
 Ne contient jamais de code dupliqué — voir `docs/storage.md`.
@@ -147,7 +148,7 @@ Ne contient jamais de code dupliqué — voir `docs/storage.md`.
 # Documentation
 
 ```txt
-🔒docs/
+docs/
   architecture.md   → qui parle à qui
   governance.md      → règles du projet
   components.md       → structure de la librairie de components
@@ -155,6 +156,28 @@ Ne contient jamais de code dupliqué — voir `docs/storage.md`.
   layout.md           → structure visuelle de l'écran
   theme.md            → couleurs, tokens, textes UI
 ```
+
+---
+
+# Vérification visuelle
+
+Un outil de capture d'écran est disponible pour valider visuellement l'état de l'app pendant le développement.
+
+**Important** : `NyxCapture.exe` est bloqué par le Contrôle intelligent des applications de Windows (exécutable non signé). Appeler le script PowerShell directement plutôt que le `.exe` — ça contourne le blocage sans désactiver la protection système.
+
+Outil : `C:\Ph3yNyx.OS\Devs\NyxCapture\src\NyxCapture.ps1`
+
+Utilisation type :
+
+```powershell
+# Lancer l'app en arrière-plan
+Start-Process -FilePath "npx.cmd" -ArgumentList "tauri", "dev" -WorkingDirectory (Get-Location)
+
+# Capturer une fois la fenêtre prête (via le script, jamais via NyxCapture.exe)
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Ph3yNyx.OS\Devs\NyxCapture\src\NyxCapture.ps1" --title "stellarnest" --wait 30 --delay 2 --output "C:\Ph3yNyx.OS\Devs\StellarNest\.screenshots"
+```
+
+L'outil retourne le chemin du PNG généré sur la sortie standard — l'ouvrir pour inspection visuelle avant de rapporter un état à l'utilisateur.
 
 ---
 
@@ -254,7 +277,7 @@ Quand une modification est demandée :
 
 1. Identifier la zone concernée.
 2. Trouver le fichier réel dans `src/` ou `src-tauri/`.
-3. Vérifier la documentation associée dans `🔒docs/`.
+3. Vérifier la documentation associée dans `docs/`.
 4. Proposer un changement minimal.
 5. Attendre validation si le changement impacte la structure.
 
@@ -284,13 +307,13 @@ src/components/library/
 Comprendre l'architecture :
 
 ```txt
-🔒docs/architecture.md
+docs/architecture.md
 ```
 
 Comprendre les règles :
 
 ```txt
-🔒docs/governance.md
+docs/governance.md
 ```
 
 ---
@@ -316,4 +339,3 @@ L'humain décide.
 Le système organise.
 Le visuel reste lié au code.
 ```
-

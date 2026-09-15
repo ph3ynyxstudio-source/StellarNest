@@ -1,0 +1,235 @@
+.launcher {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-app);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.launcher-panel {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.launcher-branding {
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.launcher-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.8em;
+}
+
+.launcher-tagline {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9em;
+}
+
+.launcher-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.launcher-action {
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card-subtle);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 0.7em 1em;
+  font-size: 0.95em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.launcher-action--primary {
+  border-color: var(--accent-violet);
+  background-color: var(--accent-violet);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.launcher-theme-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.7em 1em;
+  opacity: 0.5;
+}
+
+.launcher-theme-title {
+  color: var(--text-primary);
+  font-size: 0.9em;
+}
+
+.launcher-theme-badge {
+  color: var(--text-secondary);
+  font-size: 0.75em;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 0.2em 0.7em;
+}
+
+.launcher-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+  font-size: 0.85em;
+}
+
+.launcher-info-row {
+  display: flex;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.launcher-info-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.launcher-info-secondary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.9em;
+  opacity: 0.75;
+}
+
+.launcher-link {
+  border: none;
+  background: none;
+  color: var(--accent-cyan);
+  padding: 0;
+  font-size: 1em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.launcher-changelog {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.launcher-changelog-title {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.launcher-changelog-body {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.launcher-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+}
+
+.launcher-dialog {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.launcher-dialog-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.2em;
+}
+
+.launcher-dialog-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.85em;
+}
+
+.launcher-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.launcher-dialog-input {
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card-subtle);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 0.6em 0.8em;
+  font-size: 1em;
+  font-family: inherit;
+}
+
+.canvas-mode-toggle {
+  display: flex;
+  gap: 4px;
+  background-color: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.canvas-mode-option {
+  flex: 1;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 0.4em 0.9em;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.canvas-mode-option.active {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.launcher-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.launcher-dialog-actions .launcher-action {
+  flex: 0 0 auto;
+}

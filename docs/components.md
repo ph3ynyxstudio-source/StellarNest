@@ -139,3 +139,7 @@ Ne pas utiliser `.is-active`.
 ### Règle 9
 
 Ne pas ajouter de nouveau component à la librairie sans le classer MVP ou V2+ au préalable (voir governance.md).
+
+### Règle 10
+
+Un component de la librairie reste identique peu importe le mode du canvas (Mobile/Desktop) — pas de version "mobile" et "desktop" séparée d'un même component au MVP.

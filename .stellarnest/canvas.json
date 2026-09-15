@@ -1,1 +1,21 @@
-{"elements": []}
+{
+  "projectId": "Projet sans nom",
+  "canvasBackgroundColor": "#665997",
+  "elements": [
+    {
+      "id": "f9427be9-6cca-435a-a9ee-315d1b15e833",
+      "componentRef": "Card",
+      "sourceLocation": "src/components/library/Card/Card.tsx",
+      "x": 12.595560623726442,
+      "y": 46.0,
+      "width": 1427.4044393762736,
+      "height": 397.3895506396924,
+      "title": "Hero",
+      "content": "bonjour test ",
+      "backgroundColor": "#141830",
+      "borderColor": "#fff700",
+      "borderWidth": 5.0,
+      "borderRadius": 30.0
+    }
+  ]
+}

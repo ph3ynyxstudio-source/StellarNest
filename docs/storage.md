@@ -47,7 +47,8 @@ L'éditeur lit et écrit directement dans le vrai projet de l'utilisateur — pa
 │     └─ library/
 ├─ .stellarnest/
 │  ├─ canvas.json
-│  └─ library.json
+│  ├─ library.json
+│  └─ launcher.json
 ```
 
 ---
@@ -103,15 +104,26 @@ la logique métier
 ```ts
 type CanvasState = {
   projectId: string;
+  canvasBackgroundColor?: string; // couleur de fond du canvas-frame, voir layout.md (style-panel)
   elements: {
     id: string;
     componentRef: string;   // lien vers le component réel
     sourceLocation: string; // fichier + scope, voir architecture.md
     x: number;
     y: number;
+    width: number;          // instances redimensionnables (voir layout.md)
+    height: number;
+    title: string;          // propriétés éditables de l'instance, voir Card.schema.ts
+    content: string;
+    backgroundColor: string;
+    borderColor: string;
+    borderWidth: number;
+    borderRadius: number;
   }[];
 };
 ```
+
+Lu et écrit via deux commandes Rust (`get_canvas_state`, `save_canvas_state`), suivant le flux `UI → Rust → Filesystem` documenté dans `architecture.md` — même pattern que `launcher.json`. Chaque ajout, déplacement, redimensionnement ou changement de propriété d'instance persiste ici (état visuel uniquement, jamais le code du component). Les propriétés par instance (`title`, `content`, `backgroundColor`, `borderColor`, `borderWidth`, `borderRadius`) sont propres à chaque élément — jamais partagées entre plusieurs instances. Les anciens fichiers sans ces champs restent lisibles : le côté Rust applique les valeurs par défaut de `Card.schema.ts` pour les champs manquants.
 
 ---
 
@@ -124,6 +136,32 @@ Ne contient jamais :
 ```txt
 le code des components (voir components.md)
 ```
+
+---
+
+## launcher.json
+
+Contient la référence au dernier projet ouvert, affichée sur l'écran Launcher (voir `layout.md`).
+
+```ts
+type LauncherState = {
+  lastProject: {
+    name: string;
+    canvasMode: "mobile" | "desktop"; // fixé à la création, voir layout.md
+    openedAt: number; // secondes depuis epoch
+  } | null;
+};
+```
+
+Ne contient jamais :
+
+```txt
+le code des components
+l'état visuel du canvas (voir canvas.json)
+une liste de plusieurs projets — un seul projet récent au MVP
+```
+
+Lu et écrit via deux commandes Rust (`get_last_project`, `save_last_project`), suivant le flux `UI → Rust → Filesystem` documenté dans `architecture.md`.
 
 ---
 
@@ -140,6 +178,10 @@ Component Engine
 ↓
 Mise à jour de canvas.json (état visuel seulement)
 ```
+
+### Export — premier lien concret canvas.json → code réel
+
+Le clic sur "Exporter" déclenche ce cycle dans sa forme la plus simple actuellement : le Component Engine lit `canvas.json` (via `get_canvas_state`) et génère `src/screens/Export/GeneratedPage.tsx` à partir de son contenu — voir `architecture.md` (section Component Engine). Aucune écriture inverse (code → canvas.json) : c'est un export à sens unique pour cette première tranche, pas encore une synchronisation bidirectionnelle avec un fichier existant.
 
 ---
 
