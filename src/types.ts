@@ -13,16 +13,22 @@ export type CanvasElementState = {
   y: number;
   width: number;
   height: number;
-  title: string;
-  content: string;
-  backgroundColor: string;
-  borderColor: string;
-  borderWidth: number;
-  borderRadius: number;
+  // Propriétés propres à chaque type de component (voir {Nom}.schema.ts) —
+  // optionnelles ici car un élément ne porte que les champs de son propre schéma.
+  title?: string;
+  content?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  borderRadius?: number;
+  label?: string;
+  textColor?: string;
+  padding?: number;
 };
 
 export type CanvasState = {
   projectId: string;
   canvasBackgroundColor?: string;
+  canvasHeight?: number;
   elements: CanvasElementState[];
 };

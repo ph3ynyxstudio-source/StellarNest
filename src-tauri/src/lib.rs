@@ -104,6 +104,18 @@ fn default_border_radius() -> f64 {
     12.0
 }
 
+fn default_label() -> String {
+    "Bouton".to_string()
+}
+
+fn default_text_color() -> String {
+    "#f2f1f8".to_string()
+}
+
+fn default_padding() -> f64 {
+    16.0
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 struct CanvasElementState {
     id: String,
@@ -127,6 +139,12 @@ struct CanvasElementState {
     border_width: f64,
     #[serde(rename = "borderRadius", default = "default_border_radius")]
     border_radius: f64,
+    #[serde(default = "default_label")]
+    label: String,
+    #[serde(rename = "textColor", default = "default_text_color")]
+    text_color: String,
+    #[serde(default = "default_padding")]
+    padding: f64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -135,6 +153,8 @@ struct CanvasState {
     project_id: String,
     #[serde(rename = "canvasBackgroundColor", default)]
     canvas_background_color: Option<String>,
+    #[serde(rename = "canvasHeight", default)]
+    canvas_height: Option<f64>,
     #[serde(default)]
     elements: Vec<CanvasElementState>,
 }

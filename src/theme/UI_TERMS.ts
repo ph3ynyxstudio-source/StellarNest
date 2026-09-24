@@ -38,6 +38,9 @@ export const UI_TERMS = {
   },
   library: {
     cardLabel: "Carte",
+    buttonLabel: "Bouton",
+    sectionLabel: "Section",
+    textLabel: "Texte",
   },
   stylePanel: {
     canvasBackgroundLabel: "Couleur de fond du canvas",

@@ -17,6 +17,12 @@ import {
 } from "../../types";
 import Card from "../../components/library/Card/Card";
 import { CardSchema } from "../../components/library/Card/Card.schema";
+import Button from "../../components/library/Button/Button";
+import { ButtonSchema } from "../../components/library/Button/Button.schema";
+import Section from "../../components/library/Section/Section";
+import { SectionSchema } from "../../components/library/Section/Section.schema";
+import Text from "../../components/library/Text/Text";
+import { TextSchema } from "../../components/library/Text/Text.schema";
 import "./Editor.css";
 
 const ZOOM_MIN = 0.25;
@@ -26,11 +32,66 @@ function clampZoom(value: number) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, value));
 }
 
-const DEFAULT_ELEMENT_WIDTH = 220;
-const DEFAULT_ELEMENT_HEIGHT = 120;
 const ELEMENT_MIN_WIDTH = 120;
 const ELEMENT_MIN_HEIGHT = 60;
 const ADD_OFFSET = 24;
+const CANVAS_DEFAULT_HEIGHT = 600;
+const CANVAS_MIN_HEIGHT = 200;
+
+type SchemaFieldDef = {
+  type: string;
+  label: string;
+  default: string | number;
+};
+
+type LibrarySchema = {
+  name: string;
+  props: Record<string, SchemaFieldDef>;
+};
+
+const SCHEMAS: Record<string, LibrarySchema> = {
+  [CardSchema.name]: CardSchema,
+  [ButtonSchema.name]: ButtonSchema,
+  [SectionSchema.name]: SectionSchema,
+  [TextSchema.name]: TextSchema,
+};
+
+const LIBRARY_ITEMS: {
+  componentRef: string;
+  sourceLocation: string;
+  label: string;
+  width: number;
+  height: number;
+}[] = [
+  {
+    componentRef: CardSchema.name,
+    sourceLocation: "src/components/library/Card/Card.tsx",
+    label: UI_TERMS.library.cardLabel,
+    width: 220,
+    height: 120,
+  },
+  {
+    componentRef: ButtonSchema.name,
+    sourceLocation: "src/components/library/Button/Button.tsx",
+    label: UI_TERMS.library.buttonLabel,
+    width: 160,
+    height: 48,
+  },
+  {
+    componentRef: SectionSchema.name,
+    sourceLocation: "src/components/library/Section/Section.tsx",
+    label: UI_TERMS.library.sectionLabel,
+    width: 320,
+    height: 180,
+  },
+  {
+    componentRef: TextSchema.name,
+    sourceLocation: "src/components/library/Text/Text.tsx",
+    label: UI_TERMS.library.textLabel,
+    width: 200,
+    height: 40,
+  },
+];
 
 type EditorProps = {
   projectName: string;
@@ -52,6 +113,11 @@ type DragState =
       startX: number;
       startY: number;
       originWidth: number;
+      originHeight: number;
+    }
+  | {
+      type: "canvas-resize";
+      startY: number;
       originHeight: number;
     };
 
@@ -135,6 +201,7 @@ function Editor({ projectName, canvasMode }: EditorProps) {
   const [canvasBackgroundColor, setCanvasBackgroundColor] = useState(
     designTokens.colors.bgCard,
   );
+  const [canvasHeight, setCanvasHeight] = useState(CANVAS_DEFAULT_HEIGHT);
   const [exportStatus, setExportStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
@@ -149,6 +216,8 @@ function Editor({ projectName, canvasMode }: EditorProps) {
   const zoomRef = useRef(1);
   const canvasBackgroundColorRef = useRef(canvasBackgroundColor);
   canvasBackgroundColorRef.current = canvasBackgroundColor;
+  const canvasHeightRef = useRef(canvasHeight);
+  canvasHeightRef.current = canvasHeight;
 
   useLayoutEffect(() => {
     const node = canvasZoneRef.current;
@@ -187,6 +256,9 @@ function Editor({ projectName, canvasMode }: EditorProps) {
         if (state.canvasBackgroundColor) {
           setCanvasBackgroundColor(state.canvasBackgroundColor);
         }
+        if (state.canvasHeight) {
+          setCanvasHeight(state.canvasHeight);
+        }
       })
       .catch(() => setElements([]));
 
@@ -207,11 +279,13 @@ function Editor({ projectName, canvasMode }: EditorProps) {
   function persistCanvas(
     nextElements: CanvasElementState[],
     nextColor: string,
+    nextHeight: number,
   ) {
     invoke("save_canvas_state", {
       state: {
         projectId: projectName,
         canvasBackgroundColor: nextColor,
+        canvasHeight: nextHeight,
         elements: nextElements,
       } satisfies CanvasState,
     }).catch(() => {});
@@ -219,7 +293,7 @@ function Editor({ projectName, canvasMode }: EditorProps) {
 
   function handleCanvasBackgroundColorChange(nextColor: string) {
     setCanvasBackgroundColor(nextColor);
-    persistCanvas(elements, nextColor);
+    persistCanvas(elements, nextColor, canvasHeightRef.current);
   }
 
   function updateSelectedElement(patch: Partial<CanvasElementState>) {
@@ -228,7 +302,11 @@ function Editor({ projectName, canvasMode }: EditorProps) {
       const next = prev.map((el) =>
         el.id === selectedId ? { ...el, ...patch } : el,
       );
-      persistCanvas(next, canvasBackgroundColorRef.current);
+      persistCanvas(
+        next,
+        canvasBackgroundColorRef.current,
+        canvasHeightRef.current,
+      );
       return next;
     });
   }
@@ -242,32 +320,41 @@ function Editor({ projectName, canvasMode }: EditorProps) {
     };
   }
 
-  function handleAddCard() {
+  function handleAddElement(item: (typeof LIBRARY_ITEMS)[number]) {
     const last = elements[elements.length - 1];
-    const maxX = Math.max(0, FRAME_WIDTHS[canvasMode] - DEFAULT_ELEMENT_WIDTH);
+    const maxX = Math.max(0, FRAME_WIDTHS[canvasMode] - item.width);
     const x = last ? Math.min(last.x + ADD_OFFSET, maxX) : ADD_OFFSET;
     const y = last ? last.y + ADD_OFFSET : ADD_OFFSET;
 
     const newElement: CanvasElementState = {
       id: crypto.randomUUID(),
-      componentRef: CardSchema.name,
-      sourceLocation: "src/components/library/Card/Card.tsx",
+      componentRef: item.componentRef,
+      sourceLocation: item.sourceLocation,
       x: Math.max(0, x),
       y: Math.max(0, y),
-      width: DEFAULT_ELEMENT_WIDTH,
-      height: DEFAULT_ELEMENT_HEIGHT,
-      title: CardSchema.props.title.default,
-      content: CardSchema.props.content.default,
-      backgroundColor: CardSchema.props.backgroundColor.default,
-      borderColor: CardSchema.props.borderColor.default,
-      borderWidth: CardSchema.props.borderWidth.default,
-      borderRadius: CardSchema.props.borderRadius.default,
+      width: item.width,
+      height: item.height,
     };
+
+    const schema = SCHEMAS[item.componentRef];
+    for (const [key, def] of Object.entries(schema.props)) {
+      (newElement as Record<string, unknown>)[key] = def.default;
+    }
 
     const next = [...elements, newElement];
     setElements(next);
     setSelectedId(newElement.id);
-    persistCanvas(next, canvasBackgroundColorRef.current);
+    persistCanvas(next, canvasBackgroundColorRef.current, canvasHeightRef.current);
+  }
+
+  function handleCanvasResizeMouseDown(event: ReactMouseEvent) {
+    event.stopPropagation();
+    setSelectedId(null);
+    dragStateRef.current = {
+      type: "canvas-resize",
+      startY: event.clientY,
+      originHeight: canvasHeight,
+    };
   }
 
   useEffect(() => {
@@ -276,8 +363,16 @@ function Editor({ projectName, canvasMode }: EditorProps) {
       if (!drag) return;
 
       const z = zoomRef.current || 1;
-      const deltaX = (event.clientX - drag.startX) / z;
       const deltaY = (event.clientY - drag.startY) / z;
+
+      if (drag.type === "canvas-resize") {
+        setCanvasHeight(
+          Math.max(CANVAS_MIN_HEIGHT, drag.originHeight + deltaY),
+        );
+        return;
+      }
+
+      const deltaX = (event.clientX - drag.startX) / z;
 
       setElements((prev) =>
         prev.map((el) => {
@@ -310,8 +405,13 @@ function Editor({ projectName, canvasMode }: EditorProps) {
     function handleMouseUp() {
       if (!dragStateRef.current) return;
       dragStateRef.current = null;
+
       setElements((current) => {
-        persistCanvas(current, canvasBackgroundColorRef.current);
+        persistCanvas(
+          current,
+          canvasBackgroundColorRef.current,
+          canvasHeightRef.current,
+        );
         return current;
       });
     }
@@ -366,7 +466,7 @@ function Editor({ projectName, canvasMode }: EditorProps) {
     const next = elements.filter((el) => el.id !== selectedId);
     setElements(next);
     setSelectedId(null);
-    persistCanvas(next, canvasBackgroundColorRef.current);
+    persistCanvas(next, canvasBackgroundColorRef.current, canvasHeightRef.current);
   }
 
   async function handleExport() {
@@ -409,6 +509,81 @@ function Editor({ projectName, canvasMode }: EditorProps) {
 
   const selectedElement =
     elements.find((el) => el.id === selectedId) ?? null;
+
+  function renderCanvasComponent(el: CanvasElementState, active: boolean) {
+    switch (el.componentRef) {
+      case ButtonSchema.name:
+        return (
+          <Button
+            label={el.label ?? (ButtonSchema.props.label.default as string)}
+            backgroundColor={
+              el.backgroundColor ??
+              (ButtonSchema.props.backgroundColor.default as string)
+            }
+            textColor={
+              el.textColor ?? (ButtonSchema.props.textColor.default as string)
+            }
+            borderRadius={
+              el.borderRadius ??
+              (ButtonSchema.props.borderRadius.default as number)
+            }
+            active={active}
+          />
+        );
+      case SectionSchema.name:
+        return (
+          <Section
+            backgroundColor={
+              el.backgroundColor ??
+              (SectionSchema.props.backgroundColor.default as string)
+            }
+            padding={
+              el.padding ?? (SectionSchema.props.padding.default as number)
+            }
+            active={active}
+          />
+        );
+      case TextSchema.name:
+        return (
+          <Text
+            content={
+              el.content ?? (TextSchema.props.content.default as string)
+            }
+            textColor={
+              el.textColor ?? (TextSchema.props.textColor.default as string)
+            }
+            active={active}
+          />
+        );
+      case CardSchema.name:
+      default:
+        return (
+          <Card
+            title={el.title ?? (CardSchema.props.title.default as string)}
+            content={
+              el.content ?? (CardSchema.props.content.default as string)
+            }
+            backgroundColor={
+              el.backgroundColor ??
+              (CardSchema.props.backgroundColor.default as string)
+            }
+            borderColor={
+              el.borderColor ??
+              (CardSchema.props.borderColor.default as string)
+            }
+            borderWidth={
+              el.borderWidth ??
+              (CardSchema.props.borderWidth.default as number)
+            }
+            borderRadius={
+              el.borderRadius ??
+              (CardSchema.props.borderRadius.default as number)
+            }
+            active={active}
+          />
+        );
+    }
+  }
 
   return (
     <div className="editor-shell">
@@ -480,7 +655,14 @@ function Editor({ projectName, canvasMode }: EditorProps) {
         <div className="preview-mode">
           <div className="preview-frame">
             {!previewError && PreviewComponent ? (
-              <div className="preview-zoom-wrapper" style={{ zoom }}>
+              <div
+                className={`preview-zoom-wrapper canvas-frame--${canvasMode}`}
+                style={{
+                  zoom,
+                  backgroundColor: canvasBackgroundColor,
+                  minHeight: canvasHeight,
+                }}
+              >
                 <PreviewComponent />
               </div>
             ) : (
@@ -494,19 +676,19 @@ function Editor({ projectName, canvasMode }: EditorProps) {
       <div className="main-content">
         <aside className="library-panel">
           <div className="library-panel-title">{UI_TERMS.panels.library}</div>
-          <div className="library-item">
-            <button
-              type="button"
-              className="library-item-preview"
-              onClick={handleAddCard}
-              aria-label={UI_TERMS.library.cardLabel}
-            >
-              +
-            </button>
-            <span className="library-item-name">
-              {UI_TERMS.library.cardLabel}
-            </span>
-          </div>
+          {LIBRARY_ITEMS.map((item) => (
+            <div className="library-item" key={item.componentRef}>
+              <button
+                type="button"
+                className="library-item-preview"
+                onClick={() => handleAddElement(item)}
+                aria-label={item.label}
+              >
+                +
+              </button>
+              <span className="library-item-name">{item.label}</span>
+            </div>
+          ))}
         </aside>
 
         <section
@@ -516,7 +698,11 @@ function Editor({ projectName, canvasMode }: EditorProps) {
         >
           <div
             className={`canvas-frame canvas-frame--${canvasMode}`}
-            style={{ zoom, backgroundColor: canvasBackgroundColor }}
+            style={{
+              zoom,
+              backgroundColor: canvasBackgroundColor,
+              minHeight: canvasHeight,
+            }}
             onMouseDown={handleCanvasBackgroundMouseDown}
           >
             {elements.map((el) => (
@@ -531,15 +717,7 @@ function Editor({ projectName, canvasMode }: EditorProps) {
                 }}
                 onMouseDown={(e) => handleElementMouseDown(e, el)}
               >
-                <Card
-                  title={el.title}
-                  content={el.content}
-                  backgroundColor={el.backgroundColor}
-                  borderColor={el.borderColor}
-                  borderWidth={el.borderWidth}
-                  borderRadius={el.borderRadius}
-                  active={selectedId === el.id}
-                />
+                {renderCanvasComponent(el, selectedId === el.id)}
                 {selectedId === el.id && (
                   <div
                     className="canvas-element-resize-handle"
@@ -548,6 +726,10 @@ function Editor({ projectName, canvasMode }: EditorProps) {
                 )}
               </div>
             ))}
+            <div
+              className="canvas-frame-resize-handle"
+              onMouseDown={handleCanvasResizeMouseDown}
+            />
           </div>
         </section>
 
@@ -556,46 +738,46 @@ function Editor({ projectName, canvasMode }: EditorProps) {
 
           {selectedElement ? (
             <div className="style-field-group">
-              <TextField
-                label={CardSchema.props.title.label}
-                value={selectedElement.title}
-                onChange={(value) => updateSelectedElement({ title: value })}
-              />
-              <TextField
-                label={CardSchema.props.content.label}
-                value={selectedElement.content}
-                onChange={(value) =>
-                  updateSelectedElement({ content: value })
+              {Object.entries(
+                SCHEMAS[selectedElement.componentRef]?.props ?? {},
+              ).map(([key, def]) => {
+                const value =
+                  (selectedElement as Record<string, unknown>)[key] ??
+                  def.default;
+                const onChange = (next: string | number) =>
+                  updateSelectedElement({
+                    [key]: next,
+                  } as Partial<CanvasElementState>);
+
+                if (def.type === "color") {
+                  return (
+                    <ColorField
+                      key={key}
+                      label={def.label}
+                      value={value as string}
+                      onChange={onChange}
+                    />
+                  );
                 }
-              />
-              <ColorField
-                label={CardSchema.props.backgroundColor.label}
-                value={selectedElement.backgroundColor}
-                onChange={(value) =>
-                  updateSelectedElement({ backgroundColor: value })
+                if (def.type === "number") {
+                  return (
+                    <NumberField
+                      key={key}
+                      label={def.label}
+                      value={value as number}
+                      onChange={onChange}
+                    />
+                  );
                 }
-              />
-              <ColorField
-                label={CardSchema.props.borderColor.label}
-                value={selectedElement.borderColor}
-                onChange={(value) =>
-                  updateSelectedElement({ borderColor: value })
-                }
-              />
-              <NumberField
-                label={CardSchema.props.borderWidth.label}
-                value={selectedElement.borderWidth}
-                onChange={(value) =>
-                  updateSelectedElement({ borderWidth: value })
-                }
-              />
-              <NumberField
-                label={CardSchema.props.borderRadius.label}
-                value={selectedElement.borderRadius}
-                onChange={(value) =>
-                  updateSelectedElement({ borderRadius: value })
-                }
-              />
+                return (
+                  <TextField
+                    key={key}
+                    label={def.label}
+                    value={value as string}
+                    onChange={onChange}
+                  />
+                );
+              })}
 
               <button
                 type="button"

@@ -163,6 +163,8 @@ docs/
 
 Un outil de capture d'écran est disponible pour valider visuellement l'état de l'app pendant le développement.
 
+**Règle stricte** : ne jamais lancer NyxCapture sans que l'utilisateur l'ait explicitement demandé dans son message, pour cette tâche précise. Pas de capture automatique après une modification de code, pas de capture "par réflexe" pour valider un fix, pas de capture comme étape par défaut avant de rapporter un résultat. La validation visuelle reste possible et utile, mais uniquement sur demande explicite — jamais en initiative propre.
+
 **Important** : `NyxCapture.exe` est bloqué par le Contrôle intelligent des applications de Windows (exécutable non signé). Appeler le script PowerShell directement plutôt que le `.exe` — ça contourne le blocage sans désactiver la protection système.
 
 Outil : `C:\Ph3yNyx.OS\Devs\NyxCapture\src\NyxCapture.ps1`
@@ -177,7 +179,7 @@ Start-Process -FilePath "npx.cmd" -ArgumentList "tauri", "dev" -WorkingDirectory
 powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Ph3yNyx.OS\Devs\NyxCapture\src\NyxCapture.ps1" --title "stellarnest" --wait 30 --delay 2 --output "C:\Ph3yNyx.OS\Devs\StellarNest\.screenshots"
 ```
 
-L'outil retourne le chemin du PNG généré sur la sortie standard — l'ouvrir pour inspection visuelle avant de rapporter un état à l'utilisateur.
+L'outil retourne le chemin du PNG généré sur la sortie standard — l'ouvrir pour inspection visuelle une fois la capture demandée.
 
 ---
 

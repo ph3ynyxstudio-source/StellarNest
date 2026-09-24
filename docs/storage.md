@@ -105,25 +105,44 @@ la logique métier
 type CanvasState = {
   projectId: string;
   canvasBackgroundColor?: string; // couleur de fond du canvas-frame, voir layout.md (style-panel)
+  canvasHeight?: number;          // hauteur du canvas-frame, via la poignée de redimensionnement en bas du cadre
   elements: {
     id: string;
-    componentRef: string;   // lien vers le component réel
+    componentRef: string;   // lien vers le component réel : "Card" | "Button" | "Section" | "Text"
     sourceLocation: string; // fichier + scope, voir architecture.md
     x: number;
     y: number;
     width: number;          // instances redimensionnables (voir layout.md)
     height: number;
-    title: string;          // propriétés éditables de l'instance, voir Card.schema.ts
-    content: string;
-    backgroundColor: string;
-    borderColor: string;
-    borderWidth: number;
-    borderRadius: number;
+
+    // Champ générique par instance — présent uniquement si le schéma du
+    // component (voir {Nom}.schema.ts) le définit. Chaque instance ne porte
+    // que les champs de son propre type ; les autres restent absents.
+    title?: string;          // Card
+    content?: string;        // Card, Text
+    backgroundColor?: string; // Card, Button, Section
+    borderColor?: string;    // Card
+    borderWidth?: number;    // Card
+    borderRadius?: number;   // Card, Button
+    label?: string;          // Button
+    textColor?: string;      // Button, Text
+    padding?: number;        // Section
   }[];
 };
 ```
 
-Lu et écrit via deux commandes Rust (`get_canvas_state`, `save_canvas_state`), suivant le flux `UI → Rust → Filesystem` documenté dans `architecture.md` — même pattern que `launcher.json`. Chaque ajout, déplacement, redimensionnement ou changement de propriété d'instance persiste ici (état visuel uniquement, jamais le code du component). Les propriétés par instance (`title`, `content`, `backgroundColor`, `borderColor`, `borderWidth`, `borderRadius`) sont propres à chaque élément — jamais partagées entre plusieurs instances. Les anciens fichiers sans ces champs restent lisibles : le côté Rust applique les valeurs par défaut de `Card.schema.ts` pour les champs manquants.
+Lu et écrit via deux commandes Rust (`get_canvas_state`, `save_canvas_state`), suivant le flux `UI → Rust → Filesystem` documenté dans `architecture.md` — même pattern que `launcher.json`. Chaque ajout, déplacement, redimensionnement ou changement de propriété d'instance persiste ici (état visuel uniquement, jamais le code du component). Les propriétés par instance sont propres à chaque élément — jamais partagées entre plusieurs instances. Les anciens fichiers sans ces champs restent lisibles : le côté Rust applique les valeurs par défaut du `.schema.ts` correspondant pour les champs manquants.
+
+Chaque type de component n'utilise qu'un sous-ensemble de ces champs, correspondant exactement à son `.schema.ts` :
+
+```txt
+Card    → title, content, backgroundColor, borderColor, borderWidth, borderRadius
+Button  → label, backgroundColor, textColor, borderRadius
+Section → backgroundColor, padding
+Text    → content, textColor
+```
+
+Section n'a pas de champ `height` propre : sa hauteur vient du redimensionnement générique déjà partagé par tous les éléments (`width`/`height` ci-dessus), au même titre que Card.
 
 ---
 
